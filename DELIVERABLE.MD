@@ -1,47 +1,47 @@
-# Plan B Dev Track — Entregables (índice)
+# Plan B Dev Track — Deliverables
 
-Todos los enlaces oficiales del proyecto para revisión por mentores.
+All official project links for mentor review.
 
-## 1. Código abierto (GitHub)
+## 1. Open Source Repository (GitHub)
 
-- **Repositorio**: [https://github.com/rodgmont/walletflash](https://github.com/rodgmont/walletflash)
+- **Repository**: [rodgmont/walletflash — Bitcoin Lightning wallet with auto-conversion to mobile money (MTN MoMo, Moov Money) built on Flash API — Plan B Dev Track Assignment](https://github.com/rodgmont/walletflash)
 
-## 2. Documentación en el repo
+## 2. Documentation
 
-- **README principal**: [README.md](./README.md) — alcance, arquitectura, stack, variables de entorno, onboarding local y guía de contribución.
-- **Instrucciones para agentes de IA**: [CLAUDE.md](./CLAUDE.md) y [AGENTS.md](./AGENTS.md) (convenciones Next.js / proyecto).
-- **Este índice**: [DELIVERABLE.MD](./DELIVERABLE.MD).
+- **Main README**: [README.md](./README.md) — scope, architecture, tech stack, environment variables, local onboarding and contribution guide.
+- **AI agent instructions**: [CLAUDE.md](./CLAUDE.md) and [AGENTS.md](./AGENTS.md) (Next.js / project conventions).
+- **This index**: [DELIVERABLE.MD](./DELIVERABLE.MD).
 
-## 3. Demo en vivo
+## 3. Live Demo
 
 - **App (onboarding + dashboard)**: [https://walletflash.vercel.app](https://walletflash.vercel.app)
-- **Widget comercio (SDK demo)**: [https://walletflash.vercel.app/demo.html](https://walletflash.vercel.app/demo.html)
-- **Script CDN**: [https://walletflash.vercel.app/flash-checkout.js](https://walletflash.vercel.app/flash-checkout.js)
+- **Merchant widget (SDK demo)**: [https://walletflash.vercel.app/demo.html](https://walletflash.vercel.app/demo.html)
+- **CDN script**: [https://walletflash.vercel.app/flash-checkout.js](https://walletflash.vercel.app/flash-checkout.js)
 
-## 4. Demo local (siempre disponible)
+## 4. Local Demo (always available)
 
 ```bash
 npm install
-cp .env.example .env.local   # edita FLASH_API_SECRET si tienes credenciales Flash
+cp .env.example .env.local   # set FLASH_API_SECRET if you have Flash credentials
 npm run dev
 ```
 
-- App: [http://localhost:3000](http://localhost:3000)  
-- Widget comercio: [http://localhost:3000/demo.html](http://localhost:3000/demo.html)  
-- Script CDN (servido por la misma app): [http://localhost:3000/flash-checkout.js](http://localhost:3000/flash-checkout.js)
+- App: [http://localhost:3000](http://localhost:3000)
+- Merchant widget: [http://localhost:3000/demo.html](http://localhost:3000/demo.html)
+- CDN script (served by the same app): [http://localhost:3000/flash-checkout.js](http://localhost:3000/flash-checkout.js)
 
-## 5. Vídeo de presentación
+## 5. Video Presentation
 
-- **Enlace (rellenar)**: sube un vídeo (p. ej. YouTube **no listado** o Loom) y sustituye esta línea por la URL definitiva.
+- **Demo (30s–1min)**: [https://youtu.be/O-mtkt1YOQ0](https://youtu.be/O-mtkt1YOQ0)
 
-## 6. Recursos del brief
+## 6. Brief Resources
 
-- Flash docs: [https://docs.bitcoinflash.xyz](https://docs.bitcoinflash.xyz)  
-- Flash web: [https://bitcoinflash.xyz](https://bitcoinflash.xyz)  
-- Lightning Address: [https://lightningaddress.com/](https://lightningaddress.com/)  
+- Flash docs: [https://docs.bitcoinflash.xyz](https://docs.bitcoinflash.xyz)
+- Flash web: [https://bitcoinflash.xyz](https://bitcoinflash.xyz)
+- Lightning Address: [https://lightningaddress.com/](https://lightningaddress.com/)
 - BOLT: [https://github.com/lightning/bolts](https://github.com/lightning/bolts)
 
-## 7. Contacto mentores (brief)
+## 7. Mentor Contact (brief)
 
-- Telegram: [@maurientz](https://t.me/maurientz)  
+- Telegram: [@maurientz](https://t.me/maurientz)
 - Email: olaniranlaurent@bitcoinflash.xyz

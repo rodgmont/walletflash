@@ -14,8 +14,9 @@ Todos los enlaces oficiales del proyecto para revisión por mentores.
 
 ## 3. Demo en vivo
 
-- **URL pública (rellenar tras despliegue)**: `https://TU-DEPLOY.vercel.app`  
-  Pasos rápidos: conectar el repo en [Vercel](https://vercel.com), definir variables según [.env.example](./.env.example), desplegar y pegar aquí la URL final.
+- **App (onboarding + dashboard)**: [https://walletflash.vercel.app](https://walletflash.vercel.app)
+- **Widget comercio (SDK demo)**: [https://walletflash.vercel.app/demo.html](https://walletflash.vercel.app/demo.html)
+- **Script CDN**: [https://walletflash.vercel.app/flash-checkout.js](https://walletflash.vercel.app/flash-checkout.js)
 
 ## 4. Demo local (siempre disponible)
 

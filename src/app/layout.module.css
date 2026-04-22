@@ -1,0 +1,86 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11, 15, 26, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.navInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  gap: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.brandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  border-radius: 10px;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 12px var(--primary-glow);
+}
+
+.brandName {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--text);
+  letter-spacing: -0.03em;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navLink {
+  color: var(--text-3);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 50px;
+  transition: color 0.2s, background 0.2s;
+}
+.navLink:hover {
+  color: var(--text);
+  background: rgba(255,255,255,0.06);
+}
+
+.footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 80px;
+  padding: 24px 0;
+}
+
+.footerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: var(--text-3);
+  font-size: 0.85rem;
+}
+
+.footerLink {
+  color: var(--primary);
+  transition: opacity 0.2s;
+}
+.footerLink:hover { opacity: 0.75; }

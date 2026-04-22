@@ -18,17 +18,18 @@ export default function DashboardPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [transactionLog, setTransactionLog] = useState<TransactionLogEntry[]>([]);
 
-  const sessionSats = useMemo(
+  const totalSats = useMemo(
     () => transactionLog.reduce((acc, tx) => acc + (typeof tx.amount === 'number' ? tx.amount : 0), 0),
+    [transactionLog],
+  );
+  const totalFiat = useMemo(
+    () => transactionLog.reduce((acc, tx) => acc + (typeof tx.fiat === 'number' ? tx.fiat : 0), 0),
     [transactionLog],
   );
 
   const loadUser = useCallback(async () => {
     const un = localStorage.getItem('currentUser');
-    if (!un) {
-      router.push('/');
-      return;
-    }
+    if (!un) { router.push('/'); return; }
     try {
       const res = await fetch(`/api/user?username=${encodeURIComponent(un)}`);
       const data: unknown = await res.json();
@@ -44,9 +45,7 @@ export default function DashboardPage() {
   }, [router]);
 
   useEffect(() => {
-    const t = window.setTimeout(() => {
-      void loadUser();
-    }, 0);
+    const t = window.setTimeout(() => { void loadUser(); }, 0);
     return () => window.clearTimeout(t);
   }, [loadUser]);
 
@@ -54,15 +53,15 @@ export default function DashboardPage() {
     if (!user) return;
     setLoading(true);
     const amountMsats = 5_000_000;
-
     try {
       await fetch(`/.well-known/lnurlp/${encodeURIComponent(user.username)}`);
       const invRes = await fetch(
         `/api/lnurl/callback/${encodeURIComponent(user.username)}?amount=${amountMsats}`,
       );
       const invData: unknown = await invRes.json();
-      const invRecord = typeof invData === 'object' && invData !== null ? (invData as Record<string, unknown>) : {};
-
+      const invRecord = typeof invData === 'object' && invData !== null
+        ? (invData as Record<string, unknown>)
+        : {};
       if (typeof invRecord.pr === 'string') {
         const flashRes = await fetch('/api/sell', {
           method: 'POST',
@@ -70,7 +69,6 @@ export default function DashboardPage() {
           body: JSON.stringify({ sats: amountMsats / 1000, username: user.username }),
         });
         const data = (await flashRes.json()) as SellApiResponse;
-
         if (data.success) {
           setTransactionLog((prev) => [
             {
@@ -78,7 +76,7 @@ export default function DashboardPage() {
               amount: data.satsProcessed ?? amountMsats / 1000,
               fiat: data.fiatAmount ?? 0,
               provider: user.provider,
-              status: 'Liquidación demo → sell (Flash API o simulado)',
+              status: 'LNURL → sell (Flash API)',
             },
             ...prev,
           ]);
@@ -87,23 +85,32 @@ export default function DashboardPage() {
     } catch (e) {
       console.error(e);
     }
-
     setLoading(false);
   };
 
   if (!user) {
-    return <div className={styles.loading}>Cargando perfil…</div>;
+    return (
+      <div className={styles.loading}>
+        <span>⚡</span> Cargando perfil…
+      </div>
+    );
   }
 
   return (
     <div className={`container ${styles.page}`}>
+
+      {/* Top bar */}
       <div className={styles.topBar}>
-        <h2>
-          Flash <span className={styles.titleAccent}>Wallet</span>
-        </h2>
+        <div>
+          <p className={styles.greeting}>Bienvenido de vuelta</p>
+          <h2>
+            <span className={styles.titleAccent}>⚡ {user.username}</span>
+            <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>@flash.xyz</span>
+          </h2>
+        </div>
         <button
           type="button"
-          className="btn-secondary"
+          className="btn-ghost"
           onClick={() => {
             localStorage.removeItem('currentUser');
             router.push('/');
@@ -113,76 +120,134 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      <div className={styles.grid}>
-        <div className={`glass-panel ${styles.card}`}>
-          <p className={styles.labelMuted}>Sats procesados en esta sesión (demo)</p>
-          <h1 className={styles.balance}>
-            {sessionSats.toLocaleString()} <span className={styles.balanceUnit}>sats</span>
-          </h1>
+      {/* KPI strip */}
+      <div className={styles.kpiStrip}>
+        <div className={`card ${styles.kpiCard}`}>
+          <span className={styles.kpiIcon}>⚡</span>
+          <span className={styles.kpiLabel}>Sats procesados</span>
+          <div>
+            <span className={styles.kpiValue}>{totalSats.toLocaleString()}</span>
+            <span className={styles.kpiUnit}>sats</span>
+          </div>
+          <span className={styles.kpiSub}>esta sesión</span>
+        </div>
+        <div className={`card ${styles.kpiCard}`}>
+          <span className={styles.kpiIcon}>💸</span>
+          <span className={styles.kpiLabel}>Fiat depositado</span>
+          <div>
+            <span className={styles.kpiValue}>{totalFiat.toLocaleString()}</span>
+            <span className={styles.kpiUnit}>FCFA</span>
+          </div>
+          <span className={styles.kpiSub}>{user.provider}</span>
+        </div>
+        <div className={`card ${styles.kpiCard}`}>
+          <span className={styles.kpiIcon}>📊</span>
+          <span className={styles.kpiLabel}>Operaciones</span>
+          <div>
+            <span className={styles.kpiValue}>{transactionLog.length}</span>
+          </div>
+          <span className={styles.kpiSub}>liquidaciones demo</span>
+        </div>
+      </div>
 
+      {/* Grid */}
+      <div className={styles.grid}>
+
+        {/* CTA */}
+        <div className={`card ${styles.card} ${styles.ctaCard}`}>
+          <p className={styles.cardTitle}>
+            <span className={styles.cardTitleDot} />
+            Simular pago Lightning
+          </p>
+          <p style={{ color: 'var(--text-2)', fontSize: '0.9rem', marginBottom: 20 }}>
+            Ejecuta el flujo completo: LNURL-pay → callback → sell → depósito MoMo.
+          </p>
           <button
             type="button"
             className={`btn-primary ${styles.fullWidth}`}
             onClick={() => void handleTestCallback()}
             disabled={loading}
           >
-            {loading ? 'Procesando…' : 'Simular cobro LNURL + sell'}
+            {loading ? '⚡ Procesando…' : '⚡ Procesar 5.000 sats'}
           </button>
-          <p className={styles.labelMuted} style={{ marginTop: 16 }}>
-            En producción, el nodo o proveedor LN llamaría a{' '}
-            <code>/api/webhooks/lightning-payment</code> con el secreto configurado.
+          <p className={styles.ctaHint}>
+            En producción, el nodo Lightning notifica{' '}
+            <code>/api/webhooks/lightning-payment</code> al recibir el pago real.
           </p>
         </div>
 
-        <div className={`glass-panel ${styles.card}`}>
-          <h3 style={{ marginBottom: 24 }}>Configuración</h3>
+        {/* Config */}
+        <div className={`card ${styles.card}`}>
+          <p className={styles.cardTitle}>
+            <span className={styles.cardTitleDot} />
+            Configuración
+          </p>
 
-          <div className={styles.row}>
-            <span className={styles.labelMuted}>Lightning Address</span>
-            <strong>
-              {user.username}@flash.xyz
-            </strong>
+          <div className={styles.configRow}>
+            <span className={styles.configLabel}>Lightning Address</span>
+            <span className={styles.configValue}>
+              ⚡ {user.username}@flash.xyz
+            </span>
           </div>
-
-          <div className={styles.row}>
-            <span className={styles.labelMuted}>Límite auto-conversión</span>
-            <strong style={{ color: 'var(--secondary)' }}>{user.autoConvertLimit}%</strong>
+          <div className={styles.configRow}>
+            <span className={styles.configLabel}>Auto-conversión</span>
+            <span className={`${styles.pill}`}>✓ 100%</span>
           </div>
-
-          <div className={styles.row}>
-            <span className={styles.labelMuted}>Mobile Money</span>
-            <div className={styles.rowRight}>
-              <strong>{user.provider}</strong>
-              <br />
-              <span className={styles.labelMuted} style={{ fontSize: '0.85em' }}>
-                {user.mobileNumber}
-              </span>
+          <div className={styles.configRow}>
+            <span className={styles.configLabel}>Operador</span>
+            <div className={styles.configValue}>
+              {user.provider}
+              <div className={styles.configMuted}>{user.mobileNumber}</div>
             </div>
+          </div>
+          <div className={styles.configRow}>
+            <span className={styles.configLabel}>Min / Max recibible</span>
+            <span className={styles.configValue} style={{ color: 'var(--text-3)', fontWeight: 500 }}>
+              {((user.lnurlConfig?.minSendable ?? 1000) / 1000).toLocaleString()} –{' '}
+              {((user.lnurlConfig?.maxSendable ?? 100_000_000) / 1000).toLocaleString()} sats
+            </span>
           </div>
         </div>
       </div>
 
-      <div className={`glass-panel ${styles.logSection}`}>
-        <h3 className={styles.logTitle}>Registro de operaciones</h3>
+      {/* Log */}
+      <div className={`card ${styles.logSection}`}>
+        <div className={styles.logHeader}>
+          <p className={styles.cardTitle} style={{ margin: 0 }}>
+            <span className={styles.cardTitleDot} />
+            Registro de operaciones
+          </p>
+          {transactionLog.length > 0 && (
+            <span className={styles.logCount}>{transactionLog.length} liquidaciones</span>
+          )}
+        </div>
+
         {transactionLog.length === 0 ? (
-          <p className={styles.emptyLog}>Aún no hay liquidaciones demo en esta sesión.</p>
+          <div className={styles.emptyLog}>
+            <div className={styles.emptyLogIcon}>📭</div>
+            <p>Sin liquidaciones en esta sesión.<br />Presiona el botón de arriba para simular.</p>
+          </div>
         ) : (
           <div className={styles.logList}>
             {transactionLog.map((tx) => (
               <div key={tx.id} className={styles.logItem}>
-                <div>
-                  <strong>{tx.amount} sats</strong>
-                  <div className={styles.logStatus}>{tx.status}</div>
+                <div className={styles.logLeft}>
+                  <div className={styles.logBullet}>⚡</div>
+                  <div>
+                    <div className={styles.logSats}>{tx.amount.toLocaleString()} sats</div>
+                    <div className={styles.logStatus}>{tx.status}</div>
+                  </div>
                 </div>
-                <div className={styles.logFiat}>
-                  <strong>+{tx.fiat} FCFA</strong>
-                  <div className={styles.logFiatNote}>{tx.provider}</div>
+                <div className={styles.logRight}>
+                  <div className={styles.logFiat}>+{tx.fiat.toLocaleString()} FCFA</div>
+                  <div className={styles.logProvider}>{tx.provider}</div>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
     </div>
   );
 }

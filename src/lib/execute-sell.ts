@@ -21,41 +21,44 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-function readNestedNumber(obj: unknown, path: string[]): number | undefined {
-  let cur: unknown = obj;
-  for (const key of path) {
-    if (!isRecord(cur)) return undefined;
-    cur = cur[key];
-  }
-  return typeof cur === 'number' && Number.isFinite(cur) ? cur : undefined;
+/**
+ * Convierte sats a XOF usando la tasa de referencia.
+ * Flash usa XOF como unidad de `amount` en su API.
+ * Tasa aproximada: 1 BTC ≈ 55 000 000 XOF → 1 sat ≈ 0.55 XOF
+ * Si tienes una tasa real disponible, pásala en FLASH_XOF_PER_SAT.
+ */
+function satsToXof(sats: number): number {
+  const rateRaw = process.env.FLASH_XOF_PER_SAT;
+  const rate = rateRaw ? parseFloat(rateRaw) : 0.55;
+  return Math.floor(sats * rate);
 }
 
 /**
- * Ejecuta la venta de sats vía proxy hacia Flash API.
- * El cuerpo exacto debe alinearse con https://docs.bitcoinflash.xyz (Transactions / sell).
- * Si la documentación difiere, ajusta FLASH_SELL_AMOUNT_FIELD y el mapeo en buildSellBody.
+ * Construye el cuerpo para POST /api/v1/transactions/create
+ * Documentación oficial: https://docs.bitcoinflash.xyz/api-reference/transactions/create
  */
 function buildSellBody(
   sats: number,
   user: { provider: string; mobileNumber: string },
 ): Record<string, unknown> {
-  const base: Record<string, unknown> = {
-    amount: sats,
-    source_currency: 'BTC',
-    destination_currency: 'XOF',
-    payout_method: user.provider,
-    payout_address: user.mobileNumber,
+  return {
+    amount: satsToXof(sats),          // XOF amount (fiat a recibir)
+    type: 'SELL_BITCOIN',             // venta de BTC → XOF
+    number: user.mobileNumber,        // número de mobile money
+    receiver_address: user.mobileNumber, // dirección de pago MoMo
   };
-  const extraRaw = process.env.FLASH_SELL_EXTRA_JSON;
-  if (extraRaw) {
-    try {
-      const parsed: unknown = JSON.parse(extraRaw);
-      if (isRecord(parsed)) {
-        return { ...base, ...parsed };
-      }
-    } catch {
-      /* ignore invalid JSON */
-    }
+}
+
+function buildHeaders(jwt?: string, stagingUserId?: string): HeadersInit {
+  const base: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (jwt) {
+    base['Authorization'] = `Bearer ${jwt}`;
+  } else if (stagingUserId) {
+    // Staging-only: usa X-Staging-User-Id en lugar de JWT
+    // https://docs.bitcoinflash.xyz/authentication
+    base['X-Staging-User-Id'] = stagingUserId;
   }
   return base;
 }
@@ -71,28 +74,34 @@ export async function sellSatsForUser(username: string, sats: number): Promise<S
   }
 
   const flashApiBase =
-    process.env.NEXT_PUBLIC_FLASH_API?.replace(/\/$/, '') ||
-    'https://api.bitcoinflash.xyz/api/v1';
-  const flashJwt = process.env.FLASH_API_SECRET;
+    (process.env.NEXT_PUBLIC_FLASH_API?.replace(/\/$/, '')) ||
+    'https://staging.bitcoinflash.xyz/api/v1';
 
-  if (!flashJwt) {
+  const flashJwt = process.env.FLASH_API_SECRET;
+  const stagingUserId = process.env.FLASH_STAGING_USER_ID;
+
+  // Sin ninguna credencial → modo simulado
+  if (!flashJwt && !stagingUserId) {
     return {
       ok: true,
       mode: 'simulated',
-      fiatAmount: Math.floor(sats * 0.4),
+      fiatAmount: satsToXof(sats),
       satsProcessed: sats,
       provider: user.provider,
     };
   }
 
-  const flashResponse = await fetch(`${flashApiBase}/transactions/sell`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${flashJwt}`,
-    },
-    body: JSON.stringify(buildSellBody(sats, user)),
-  });
+  let flashResponse: Response;
+  try {
+    flashResponse = await fetch(`${flashApiBase}/transactions/create`, {
+      method: 'POST',
+      headers: buildHeaders(flashJwt, stagingUserId),
+      body: JSON.stringify(buildSellBody(sats, user)),
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Network error';
+    return { ok: false, error: `No se pudo contactar Flash API: ${msg}`, status: 503 };
+  }
 
   let result: unknown;
   try {
@@ -109,14 +118,15 @@ export async function sellSatsForUser(username: string, sats: number): Promise<S
     return { ok: false, error: message, status: flashResponse.status || 502 };
   }
 
-  const data = isRecord(result) && isRecord(result.data) ? result.data : undefined;
+  // Respuesta exitosa: { success: true, transaction: { id, amount, exchange_rate, status, ... } }
+  const tx = isRecord(result) && isRecord(result.transaction) ? result.transaction : undefined;
+
   const fiatAmount =
-    (data && readNestedNumber(data, ['received_amount'])) ?? Math.floor(sats * 0.4);
+    (tx && typeof tx.amount === 'number' ? tx.amount : undefined) ?? satsToXof(sats);
 
   const transactionId =
-    (data && typeof data.transaction_id === 'string' && data.transaction_id) ||
-    (data && typeof data.id === 'string' && data.id) ||
-    undefined;
+    (tx && typeof tx.id === 'string' ? tx.id : undefined) ||
+    (tx && typeof tx.reference === 'string' ? tx.reference : undefined);
 
   return {
     ok: true,

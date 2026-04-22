@@ -1,32 +1,33 @@
 # CLAUDE.md — Walletflash / Plan B Dev Track
 
-Instrucciones para asistentes de código que trabajen en este repositorio.
+Instructions for AI coding assistants working in this repository.
 
-## Contexto del producto
+## Product context
 
-- **Flash**: Lightning + mobile money en África Occidental; este repo es una capa web (Next.js) que demuestra **Lightning Address / LNURL-pay (LUD-16)**, un **proxy seguro** hacia el endpoint de **venta (sell)** de la API Flash, un **widget CDN** para comercios y un **onboarding** guiado.
-- **Importante**: la generación de facturas BOLT11 reales y el acuse de pago desde un nodo Lightning **no están incluidos** como servicio alojado: el código deja el gancho `POST /api/webhooks/lightning-payment` para que un nodo o proveedor notifique cuando un cobro se liquide.
+- **Flash**: Lightning + mobile money in West Africa. This repo is a Next.js layer that demonstrates **Lightning Address / LNURL-pay (LUD-16)**, a **server-side proxy** to Flash's **sell** flow (`POST /transactions/create`), a **CDN widget** for merchants, and a **guided onboarding**.
+- **Note**: real BOLT11 invoice generation and Lightning payment acknowledgement from a node are **not included** as a hosted service. The code provides the `POST /api/webhooks/lightning-payment` hook for a node or provider to call when an invoice settles.
 
-## Reglas de implementación
+## Implementation rules
 
-1. **Estilos de UI**: preferir **CSS Modules** (`*.module.css`) para páginas nuevas; mantener coherencia con `globals.css` (tokens, botones, glass).
-2. **Secretos**: nunca exponer `FLASH_API_SECRET` ni `LIGHTNING_WEBHOOK_SECRET` al cliente; solo uso en **route handlers** servidor.
-3. **Persistencia**: `data.json` está **ignorado por git**; en local se crea al registrar usuarios. Para producción, sustituir `src/lib/db.ts` por una base real.
-4. **API Flash**: el cuerpo exacto de `POST /transactions/sell` debe alinearse con la documentación oficial. Si difiere, usar `FLASH_SELL_EXTRA_JSON` (ver `.env.example`) sin hardcodear credenciales.
-5. **Next.js**: esta plantilla usa **Next 16** (App Router). Respeta avisos de deprecación en la documentación empaquetada de Next si actualizas dependencias.
+1. **UI styles**: prefer **CSS Modules** (`*.module.css`) for new pages; reuse tokens and global classes (`btn-primary`, `card`, etc.) from `globals.css`.
+2. **Secrets**: never expose `FLASH_API_SECRET`, `FLASH_STAGING_USER_ID`, or `LIGHTNING_WEBHOOK_SECRET` to the client — server route handlers only.
+3. **Persistence**: `db.ts` uses an in-memory `Map` (Vercel-compatible). For production, replace with a real database.
+4. **Flash API**: align request body with [docs.bitcoinflash.xyz](https://docs.bitcoinflash.xyz). Use `FLASH_XOF_PER_SAT` to tune the sats→XOF conversion rate.
+5. **Next.js**: this project uses **Next 16** (App Router). Respect deprecation notices in the bundled Next.js docs when updating dependencies.
 
-## Mapa útil
+## File map
 
-| Ruta | Rol |
-|------|-----|
-| `src/app/.well-known/lnurlp/[username]/route.ts` | Metadatos LNURL-pay |
-| `src/app/api/lnurl/callback/[username]/route.ts` | Callback (invoice simulada en demo) |
-| `src/app/api/sell/route.ts` | Proxy sell → Flash o modo simulado |
-| `src/app/api/webhooks/lightning-payment/route.ts` | Webhook servidor→sell |
-| `src/lib/execute-sell.ts` | Lógica compartida de venta |
-| `public/flash-checkout.js` | Widget para comercios |
-| `public/demo.html` | Página demo del widget |
+| Route | Role |
+|-------|------|
+| `src/app/.well-known/lnurlp/[username]/route.ts` | LNURL-pay metadata (LUD-16) |
+| `src/app/api/lnurl/callback/[username]/route.ts` | LNURL callback (simulated invoice in demo) |
+| `src/app/api/sell/route.ts` | Sell proxy → Flash or simulated mode |
+| `src/app/api/webhooks/lightning-payment/route.ts` | Production webhook: node → sell |
+| `src/lib/execute-sell.ts` | Shared sell logic |
+| `src/lib/db.ts` | In-memory user store |
+| `public/flash-checkout.js` | Merchant checkout widget |
+| `public/demo.html` | Widget demo page |
 
-## Skills / agentes usados (referencia)
+## Skills used
 
-Durante el desarrollo se pueden usar skills de Cursor (p. ej. estándares de reglas o despliegue) según el flujo del equipo; no es obligatorio listar versiones aquí. Mantén este archivo actualizado si cambia la arquitectura o los límites de la demo.
+Cursor Agent skills were used during development for rule creation, UI iteration, and API alignment. See [AGENTS.md](./AGENTS.md) for project conventions.

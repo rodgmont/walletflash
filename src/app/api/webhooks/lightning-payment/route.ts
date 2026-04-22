@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { sellSatsForUser } from '@/lib/execute-sell';
 
 /**
- * Punto de enganche para un procesador Lightning (LND, servicio LNURL, etc.):
- * al liquidarse un cobro, llama a este endpoint con el secreto compartido.
+ * Webhook endpoint for a Lightning processor (LND, LNURL service, etc.):
+ * when an invoice settles, call this endpoint with the shared secret header.
  */
 export async function POST(request: Request) {
   const secret = process.env.LIGHTNING_WEBHOOK_SECRET;

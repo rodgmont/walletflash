@@ -36,21 +36,13 @@
   function scriptOrigin() {
     const el = document.currentScript;
     if (el && el.src) {
-      try {
-        return new URL(el.src).origin;
-      } catch {
-        /* fall through */
-      }
+      try { return new URL(el.src).origin; } catch { /* fall through */ }
     }
     const scripts = document.getElementsByTagName('script');
     for (let i = scripts.length - 1; i >= 0; i -= 1) {
       const s = scripts[i];
       if (s.src && /flash-checkout\.js/i.test(s.src)) {
-        try {
-          return new URL(s.src).origin;
-        } catch {
-          break;
-        }
+        try { return new URL(s.src).origin; } catch { break; }
       }
     }
     return window.location.origin;
@@ -102,40 +94,35 @@
         if (res.ok) {
           const j = await res.json();
           if (j && j.tag === 'payRequest' && typeof j.callback === 'string') {
-            banner =
-              '<div class="flash-banner ok">LNURL-pay resuelto en esta app (LUD-16). Listo para cobrar con cartera Lightning.</div>';
+            banner = '<div class="flash-banner ok">LNURL-pay resolved (LUD-16). Ready to receive payments from any Lightning wallet.</div>';
           } else {
-            banner =
-              '<div class="flash-banner err">Respuesta LNURL inesperada. Revisa el usuario en la app Flash.</div>';
+            banner = '<div class="flash-banner err">Unexpected LNURL response. Check the user registration.</div>';
           }
         } else {
-          banner = `<div class="flash-banner err">No se encontró LNURL para <strong>${local}</strong> (${res.status}). Regístralo primero en el onboarding.</div>`;
+          banner = `<div class="flash-banner err">LNURL not found for <strong>${local}</strong> (${res.status}). Register this alias in the Flash app first.</div>`;
         }
       } catch {
-        banner =
-          '<div class="flash-banner err">No se pudo contactar la app Flash (CORS o URL). Asegúrate de cargar el script desde el mismo dominio desplegado.</div>';
+        banner = '<div class="flash-banner err">Could not reach the Flash app (CORS or URL). Make sure the script is loaded from the deployed app domain.</div>';
       }
 
       const qrPayload = encodeURIComponent(`lightning:${address}`);
       this.modal.innerHTML = `
-        <button type="button" class="flash-btn-close" aria-label="Cerrar">✕</button>
-        <h2 style="margin-top:0; color: #f7931a;">Pagar con Lightning</h2>
+        <button type="button" class="flash-btn-close" aria-label="Close">✕</button>
+        <h2 style="margin-top:0; color: #f7931a;">Pay with Lightning</h2>
         ${banner}
-        <p style="color: #8b92a5;">Importe sugerido: <strong>${sats} sats</strong></p>
+        <p style="color: #8b92a5;">Suggested amount: <strong>${sats} sats</strong></p>
         <p style="color: #8b92a5;">Lightning Address:</p>
         <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; text-align: center; margin: 16px 0;">
           <strong style="color: #fff;">${address}</strong>
         </div>
-        <p style="font-size: 0.8rem; color: #6f7688;">Origen de la app: <code>${this.origin}</code>${domain ? ` · dominio en address: <code>${domain}</code>` : ''}</p>
+        <p style="font-size: 0.8rem; color: #6f7688;">App origin: <code>${this.origin}</code>${domain ? ` · address domain: <code>${domain}</code>` : ''}</p>
         <div class="flash-qr-placeholder">
-          <img width="200" height="200" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrPayload}" alt="QR Lightning" />
+          <img width="200" height="200" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrPayload}" alt="Lightning QR" />
         </div>
-        <p style="text-align: center; font-size: 0.85rem; color: #8b92a5;">Tras el pago, tu backend Lightning debe notificar <code>/api/webhooks/lightning-payment</code> para ejecutar el sell vía Flash.</p>
+        <p style="text-align: center; font-size: 0.85rem; color: #8b92a5;">After payment, your Lightning backend notifies <code>/api/webhooks/lightning-payment</code> to execute the sell via Flash.</p>
       `;
       const closeBtn = this.modal.querySelector('.flash-btn-close');
-      if (closeBtn) {
-        closeBtn.addEventListener('click', () => this.close());
-      }
+      if (closeBtn) closeBtn.addEventListener('click', () => this.close());
       this.overlay.classList.add('open');
     }
 

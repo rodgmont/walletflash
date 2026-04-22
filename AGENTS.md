@@ -1,12 +1,13 @@
 <!-- BEGIN:nextjs-agent-rules -->
-# Next.js en este repo
+# Next.js in this repo
 
-Esta versión puede diferir de patrones antiguos. Antes de cambiar rutas o APIs de Next, revisa la guía en `node_modules/next/dist/docs/` y los avisos de deprecación.
+This version may differ from older patterns. Before changing routes or Next.js APIs, check the guide in `node_modules/next/dist/docs/` and respect deprecation notices.
 
-# Reglas del proyecto walletflash
+# Walletflash project rules
 
-- **CSS**: nuevas vistas → **CSS Modules**; reutiliza tokens y clases globales (`btn-primary`, `glass-panel`, etc.).
-- **LNURL / Lightning**: no simules pagos reales en producción; documenta el modo demo y el webhook `LIGHTNING_WEBHOOK_SECRET`.
-- **Datos**: `data.json` es local y está en `.gitignore`; no commitear datos personales.
-- **Integración Flash**: validar payloads con [docs.bitcoinflash.xyz](https://docs.bitcoinflash.xyz); usar `.env.example` como contrato de configuración.
+- **CSS**: new views → **CSS Modules**; reuse tokens and global classes (`btn-primary`, `card`, etc.).
+- **LNURL / Lightning**: do not simulate real payments in production; document demo mode and the `LIGHTNING_WEBHOOK_SECRET` webhook.
+- **Data**: `db.ts` uses an in-memory Map (Vercel-compatible). For production replace with a real DB.
+- **Flash API**: validate payloads against [docs.bitcoinflash.xyz](https://docs.bitcoinflash.xyz); use `.env.example` as the configuration contract.
+- **Language**: all code, comments, and UI text must be written in **English**.
 <!-- END:nextjs-agent-rules -->

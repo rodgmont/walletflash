@@ -3,9 +3,9 @@ import type { UserProfile } from '@/types/user';
 export type { UserProfile };
 
 /**
- * Almacén en memoria compatible con entornos serverless (Vercel).
- * Los datos persisten mientras la instancia del servidor esté activa.
- * Para producción real, sustituir por una base de datos (Postgres, Redis, etc.).
+ * In-memory store compatible with serverless environments (Vercel).
+ * Data persists while the server instance is active.
+ * For production, replace with a real database (Postgres, Redis, etc.).
  */
 const store = new Map<string, UserProfile>();
 

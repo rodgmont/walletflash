@@ -7,7 +7,7 @@ import styles from './page.module.css';
 const STEPS = [
   { label: 'Alias' },
   { label: 'Mobile Money' },
-  { label: 'Listo' },
+  { label: 'Done' },
 ];
 
 export default function OnboardingPage() {
@@ -25,14 +25,14 @@ export default function OnboardingPage() {
     if (step === 1) {
       const h = handle.trim().toLowerCase();
       if (!/^[a-z0-9._-]{2,32}$/.test(h)) {
-        setError('Usa 2–32 caracteres: letras minúsculas, números, . _ -');
+        setError('Use 2–32 characters: lowercase letters, numbers, . _ -');
         return;
       }
     }
     if (step === 2) {
       const digits = mobileNumber.replace(/\D/g, '');
       if (digits.length < 8) {
-        setError('Introduce un número móvil válido (mín. 8 dígitos).');
+        setError('Enter a valid mobile number (min. 8 digits).');
         return;
       }
       setLoading(true);
@@ -56,7 +56,7 @@ export default function OnboardingPage() {
           data !== null &&
           typeof (data as { error?: string }).error === 'string'
             ? (data as { error: string }).error
-            : 'No se pudo registrar. Reintenta.';
+            : 'Could not register. Please try again.';
         setError(msg);
         return;
       }
@@ -107,15 +107,15 @@ export default function OnboardingPage() {
           <div>
             <p className="badge" style={{ marginBottom: 20 }}>⚡ Lightning Address</p>
             <h2 className={styles.stepHeading}>
-              Crea tu <span className={styles.stepAccent}>alias</span>
+              Create your <span className={styles.stepAccent}>alias</span>
             </h2>
             <p className={styles.stepLead}>
-              Es como un correo pero para Bitcoin. Cualquier cartera Lightning puede
-              enviarte sats a <strong style={{ color: 'var(--text-2)' }}>tualias@flash.xyz</strong> al instante.
+              It works like an email but for Bitcoin. Any Lightning wallet can
+              send you sats to <strong style={{ color: 'var(--text-2)' }}>youralias@flash.xyz</strong> instantly.
             </p>
 
             <div className="input-group">
-              <label className="input-label" htmlFor="handle">Tu alias</label>
+              <label className="input-label" htmlFor="handle">Your alias</label>
               <div className={styles.handleRow}>
                 <input
                   id="handle"
@@ -138,15 +138,15 @@ export default function OnboardingPage() {
           <div>
             <p className="badge" style={{ marginBottom: 20 }}>📱 Mobile Money</p>
             <h2 className={styles.stepHeading}>
-              Vincula tu <span className={styles.stepAccent}>MoMo</span>
+              Link your <span className={styles.stepAccent}>MoMo</span>
             </h2>
             <p className={styles.stepLead}>
-              Los sats recibidos se convierten automáticamente a FCFA y se
-              depositan en este número vía Flash API.
+              Received sats are automatically converted to XOF and
+              deposited to this number via Flash API.
             </p>
 
             <div className="input-group">
-              <label className="input-label" htmlFor="provider">Operador</label>
+              <label className="input-label" htmlFor="provider">Operator</label>
               <select
                 id="provider"
                 className="input-field"
@@ -160,7 +160,7 @@ export default function OnboardingPage() {
               </select>
             </div>
             <div className="input-group">
-              <label className="input-label" htmlFor="mobile">Número</label>
+              <label className="input-label" htmlFor="mobile">Phone number</label>
               <input
                 id="mobile"
                 type="tel"
@@ -181,11 +181,11 @@ export default function OnboardingPage() {
           <div>
             <div className={styles.successIcon}>✓</div>
             <h2 className={styles.stepHeading}>
-              <span className={styles.stepAccent}>¡Todo listo!</span>
+              <span className={styles.stepAccent}>You&apos;re all set!</span>
             </h2>
             <p className={styles.stepLead}>
-              Tu Lightning Address está activa y el pipeline de auto-conversión
-              está configurado.
+              Your Lightning Address is active and the auto-conversion
+              pipeline is configured.
             </p>
 
             <div className={styles.addressPill}>
@@ -197,15 +197,15 @@ export default function OnboardingPage() {
 
             <div style={{ marginBottom: 24 }}>
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Operador</span>
+                <span className={styles.infoLabel}>Operator</span>
                 <span className={styles.infoValue}>{provider}</span>
               </div>
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Número</span>
+                <span className={styles.infoLabel}>Phone number</span>
                 <span className={styles.infoValue}>{mobileNumber}</span>
               </div>
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Auto-conversión</span>
+                <span className={styles.infoLabel}>Auto-conversion</span>
                 <span className={styles.infoValue} style={{ color: 'var(--success)' }}>100%</span>
               </div>
             </div>
@@ -215,7 +215,7 @@ export default function OnboardingPage() {
         <div className={styles.actions}>
           {step > 1 ? (
             <button type="button" className="btn-ghost" onClick={() => setStep(step - 1)}>
-              ← Atrás
+              ← Back
             </button>
           ) : (
             <div className={styles.spacer} />
@@ -224,17 +224,16 @@ export default function OnboardingPage() {
           <button
             type="button"
             className={`btn-primary ${step === 3 ? styles.btnFullWidth : ''}`}
-            style={step !== 3 ? undefined : { marginTop: 0 }}
             onClick={() => void handleNext()}
             disabled={loading || (step === 1 && !handle.trim())}
           >
             {loading
-              ? 'Guardando…'
+              ? 'Saving…'
               : step === 3
-              ? 'Ir al panel →'
+              ? 'Go to dashboard →'
               : step === 2
-              ? 'Confirmar'
-              : 'Continuar →'}
+              ? 'Confirm'
+              : 'Continue →'}
           </button>
         </div>
       </div>

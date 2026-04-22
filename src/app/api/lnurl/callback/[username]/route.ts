@@ -31,10 +31,9 @@ export async function GET(
     );
   }
 
-  // Validate amount limits configured by user
   const min = user.lnurlConfig?.minSendable || 1000;
   const max = user.lnurlConfig?.maxSendable || 100000000;
-  
+
   if (amountMsats < min || amountMsats > max) {
     return NextResponse.json(
       { status: 'ERROR', reason: 'Amount is out of bounds' },
@@ -43,8 +42,8 @@ export async function GET(
   }
 
   /**
-   * Producción: generar BOLT11 con tu nodo o proveedor (LND, CLN, servicio LNURL).
-   * Tras el pago, el servicio debe llamar a POST /api/webhooks/lightning-payment con LIGHTNING_WEBHOOK_SECRET.
+   * Production: generate a real BOLT11 invoice via your Lightning node or provider (LND, CLN, LNURL service).
+   * After payment, the service must call POST /api/webhooks/lightning-payment with LIGHTNING_WEBHOOK_SECRET.
    */
   const placeholderInvoice = `lnbc${amountMsats}p_simulated_invoice_for_${username}_${Date.now()}`;
 

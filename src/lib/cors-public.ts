@@ -1,4 +1,4 @@
-/** CORS para integraciones del widget en dominios de comerciantes. */
+/** CORS headers for merchant widget integrations on external domains. */
 export function publicLnurlCorsHeaders(): HeadersInit {
   const origin = process.env.CDN_WIDGET_ALLOW_ORIGIN?.trim();
   return {

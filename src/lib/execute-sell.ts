@@ -22,10 +22,10 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 }
 
 /**
- * Convierte sats a XOF usando la tasa de referencia.
- * Flash usa XOF como unidad de `amount` en su API.
- * Tasa aproximada: 1 BTC ≈ 55 000 000 XOF → 1 sat ≈ 0.55 XOF
- * Si tienes una tasa real disponible, pásala en FLASH_XOF_PER_SAT.
+ * Converts sats to XOF using the reference rate.
+ * Flash uses XOF as the `amount` unit in its API.
+ * Default rate: 0.55 (≈ 1 BTC = 55,000,000 XOF).
+ * Override with FLASH_XOF_PER_SAT if you have a live rate available.
  */
 function satsToXof(sats: number): number {
   const rateRaw = process.env.FLASH_XOF_PER_SAT;
@@ -34,18 +34,18 @@ function satsToXof(sats: number): number {
 }
 
 /**
- * Construye el cuerpo para POST /api/v1/transactions/create
- * Documentación oficial: https://docs.bitcoinflash.xyz/api-reference/transactions/create
+ * Builds the request body for POST /api/v1/transactions/create
+ * Official docs: https://docs.bitcoinflash.xyz/api-reference/transactions/create
  */
 function buildSellBody(
   sats: number,
   user: { provider: string; mobileNumber: string },
 ): Record<string, unknown> {
   return {
-    amount: satsToXof(sats),          // XOF amount (fiat a recibir)
-    type: 'SELL_BITCOIN',             // venta de BTC → XOF
-    number: user.mobileNumber,        // número de mobile money
-    receiver_address: user.mobileNumber, // dirección de pago MoMo
+    amount: satsToXof(sats),
+    type: 'SELL_BITCOIN',
+    number: user.mobileNumber,
+    receiver_address: user.mobileNumber,
   };
 }
 
@@ -56,8 +56,6 @@ function buildHeaders(jwt?: string, stagingUserId?: string): HeadersInit {
   if (jwt) {
     base['Authorization'] = `Bearer ${jwt}`;
   } else if (stagingUserId) {
-    // Staging-only: usa X-Staging-User-Id en lugar de JWT
-    // https://docs.bitcoinflash.xyz/authentication
     base['X-Staging-User-Id'] = stagingUserId;
   }
   return base;
@@ -70,7 +68,7 @@ export async function sellSatsForUser(username: string, sats: number): Promise<S
 
   const user = getUser(username);
   if (!user) {
-    return { ok: false, error: 'User does not exist in DB', status: 404 };
+    return { ok: false, error: 'User does not exist', status: 404 };
   }
 
   const flashApiBase =
@@ -80,7 +78,6 @@ export async function sellSatsForUser(username: string, sats: number): Promise<S
   const flashJwt = process.env.FLASH_API_SECRET;
   const stagingUserId = process.env.FLASH_STAGING_USER_ID;
 
-  // Sin ninguna credencial → modo simulado
   if (!flashJwt && !stagingUserId) {
     return {
       ok: true,
@@ -100,7 +97,7 @@ export async function sellSatsForUser(username: string, sats: number): Promise<S
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Network error';
-    return { ok: false, error: `No se pudo contactar Flash API: ${msg}`, status: 503 };
+    return { ok: false, error: `Could not reach Flash API: ${msg}`, status: 503 };
   }
 
   let result: unknown;
@@ -118,7 +115,6 @@ export async function sellSatsForUser(username: string, sats: number): Promise<S
     return { ok: false, error: message, status: flashResponse.status || 502 };
   }
 
-  // Respuesta exitosa: { success: true, transaction: { id, amount, exchange_rate, status, ... } }
   const tx = isRecord(result) && isRecord(result.transaction) ? result.transaction : undefined;
 
   const fiatAmount =

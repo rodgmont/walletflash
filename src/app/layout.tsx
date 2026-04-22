@@ -4,18 +4,18 @@ import './globals.css';
 import styles from './layout.module.css';
 
 export const metadata: Metadata = {
-  title: 'Flash — Lightning, Mobile Money y checkout',
+  title: 'Flash — Lightning, Mobile Money & Checkout',
   description:
-    'Wallet web: Lightning Address (LNURL), venta de sats vía API Flash, widget para comercios y onboarding.',
+    'Web wallet: Lightning Address (LNURL), automatic sats-to-fiat via Flash API, merchant checkout widget and onboarding.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="en">
       <body>
         <header className={styles.nav}>
           <div className={`container ${styles.navInner}`}>
-            <Link href="/" className={styles.brand} aria-label="Flash — inicio">
+            <Link href="/" className={styles.brand} aria-label="Flash — home">
               <span className={styles.brandIcon}>⚡</span>
               <span className={styles.brandName}>Flash</span>
             </Link>

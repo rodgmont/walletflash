@@ -15,7 +15,7 @@ export async function GET(
 
   if (!user) {
     return NextResponse.json(
-      { status: 'ERROR', reason: 'User not found or mapping does not exist' },
+      { status: 'ERROR', reason: 'User not found' },
       { status: 404, headers: publicLnurlCorsHeaders() },
     );
   }

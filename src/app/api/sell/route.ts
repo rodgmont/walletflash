@@ -26,8 +26,8 @@ export async function POST(request: Request) {
       success: true,
       message:
         outcome.mode === 'simulated'
-          ? 'Successfully sold satoshis (simulated: set FLASH_API_SECRET for live Flash API)'
-          : 'Successfully transacted via Flash API',
+          ? 'Sats sold successfully (simulated — set FLASH_API_SECRET or FLASH_STAGING_USER_ID for live Flash API)'
+          : 'Transaction completed via Flash API',
       fiatAmount: outcome.fiatAmount,
       satsProcessed: outcome.satsProcessed,
       transactionId: outcome.transactionId,

@@ -91,7 +91,7 @@ export default function DashboardPage() {
   if (!user) {
     return (
       <div className={styles.loading}>
-        <span>⚡</span> Cargando perfil…
+        <span>⚡</span> Loading profile…
       </div>
     );
   }
@@ -102,7 +102,7 @@ export default function DashboardPage() {
       {/* Top bar */}
       <div className={styles.topBar}>
         <div>
-          <p className={styles.greeting}>Bienvenido de vuelta</p>
+          <p className={styles.greeting}>Welcome back</p>
           <h2>
             <span className={styles.titleAccent}>⚡ {user.username}</span>
             <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>@flash.xyz</span>
@@ -116,7 +116,7 @@ export default function DashboardPage() {
             router.push('/');
           }}
         >
-          Cerrar sesión
+          Sign out
         </button>
       </div>
 
@@ -124,29 +124,29 @@ export default function DashboardPage() {
       <div className={styles.kpiStrip}>
         <div className={`card ${styles.kpiCard}`}>
           <span className={styles.kpiIcon}>⚡</span>
-          <span className={styles.kpiLabel}>Sats procesados</span>
+          <span className={styles.kpiLabel}>Sats processed</span>
           <div>
             <span className={styles.kpiValue}>{totalSats.toLocaleString()}</span>
             <span className={styles.kpiUnit}>sats</span>
           </div>
-          <span className={styles.kpiSub}>esta sesión</span>
+          <span className={styles.kpiSub}>this session</span>
         </div>
         <div className={`card ${styles.kpiCard}`}>
           <span className={styles.kpiIcon}>💸</span>
-          <span className={styles.kpiLabel}>Fiat depositado</span>
+          <span className={styles.kpiLabel}>Fiat deposited</span>
           <div>
             <span className={styles.kpiValue}>{totalFiat.toLocaleString()}</span>
-            <span className={styles.kpiUnit}>FCFA</span>
+            <span className={styles.kpiUnit}>XOF</span>
           </div>
           <span className={styles.kpiSub}>{user.provider}</span>
         </div>
         <div className={`card ${styles.kpiCard}`}>
           <span className={styles.kpiIcon}>📊</span>
-          <span className={styles.kpiLabel}>Operaciones</span>
+          <span className={styles.kpiLabel}>Transactions</span>
           <div>
             <span className={styles.kpiValue}>{transactionLog.length}</span>
           </div>
-          <span className={styles.kpiSub}>liquidaciones demo</span>
+          <span className={styles.kpiSub}>demo settlements</span>
         </div>
       </div>
 
@@ -157,10 +157,10 @@ export default function DashboardPage() {
         <div className={`card ${styles.card} ${styles.ctaCard}`}>
           <p className={styles.cardTitle}>
             <span className={styles.cardTitleDot} />
-            Simular pago Lightning
+            Simulate Lightning payment
           </p>
           <p style={{ color: 'var(--text-2)', fontSize: '0.9rem', marginBottom: 20 }}>
-            Ejecuta el flujo completo: LNURL-pay → callback → sell → depósito MoMo.
+            Run the full flow: LNURL-pay → callback → sell → MoMo deposit.
           </p>
           <button
             type="button"
@@ -168,11 +168,11 @@ export default function DashboardPage() {
             onClick={() => void handleTestCallback()}
             disabled={loading}
           >
-            {loading ? '⚡ Procesando…' : '⚡ Procesar 5.000 sats'}
+            {loading ? '⚡ Processing…' : '⚡ Process 5,000 sats'}
           </button>
           <p className={styles.ctaHint}>
-            En producción, el nodo Lightning notifica{' '}
-            <code>/api/webhooks/lightning-payment</code> al recibir el pago real.
+            In production, the Lightning node notifies{' '}
+            <code>/api/webhooks/lightning-payment</code> when a real payment settles.
           </p>
         </div>
 
@@ -180,7 +180,7 @@ export default function DashboardPage() {
         <div className={`card ${styles.card}`}>
           <p className={styles.cardTitle}>
             <span className={styles.cardTitleDot} />
-            Configuración
+            Configuration
           </p>
 
           <div className={styles.configRow}>
@@ -190,18 +190,18 @@ export default function DashboardPage() {
             </span>
           </div>
           <div className={styles.configRow}>
-            <span className={styles.configLabel}>Auto-conversión</span>
-            <span className={`${styles.pill}`}>✓ 100%</span>
+            <span className={styles.configLabel}>Auto-conversion</span>
+            <span className={styles.pill}>✓ 100%</span>
           </div>
           <div className={styles.configRow}>
-            <span className={styles.configLabel}>Operador</span>
+            <span className={styles.configLabel}>Operator</span>
             <div className={styles.configValue}>
               {user.provider}
               <div className={styles.configMuted}>{user.mobileNumber}</div>
             </div>
           </div>
           <div className={styles.configRow}>
-            <span className={styles.configLabel}>Min / Max recibible</span>
+            <span className={styles.configLabel}>Min / Max receivable</span>
             <span className={styles.configValue} style={{ color: 'var(--text-3)', fontWeight: 500 }}>
               {((user.lnurlConfig?.minSendable ?? 1000) / 1000).toLocaleString()} –{' '}
               {((user.lnurlConfig?.maxSendable ?? 100_000_000) / 1000).toLocaleString()} sats
@@ -215,17 +215,17 @@ export default function DashboardPage() {
         <div className={styles.logHeader}>
           <p className={styles.cardTitle} style={{ margin: 0 }}>
             <span className={styles.cardTitleDot} />
-            Registro de operaciones
+            Transaction log
           </p>
           {transactionLog.length > 0 && (
-            <span className={styles.logCount}>{transactionLog.length} liquidaciones</span>
+            <span className={styles.logCount}>{transactionLog.length} settlements</span>
           )}
         </div>
 
         {transactionLog.length === 0 ? (
           <div className={styles.emptyLog}>
             <div className={styles.emptyLogIcon}>📭</div>
-            <p>Sin liquidaciones en esta sesión.<br />Presiona el botón de arriba para simular.</p>
+            <p>No settlements in this session.<br />Press the button above to simulate.</p>
           </div>
         ) : (
           <div className={styles.logList}>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className={styles.logRight}>
-                  <div className={styles.logFiat}>+{tx.fiat.toLocaleString()} FCFA</div>
+                  <div className={styles.logFiat}>+{tx.fiat.toLocaleString()} XOF</div>
                   <div className={styles.logProvider}>{tx.provider}</div>
                 </div>
               </div>
